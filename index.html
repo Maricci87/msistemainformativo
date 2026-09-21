@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Mappa del Sistema Informativo d'Ateneo — UniTo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#292929;
+  --ink-dim:#5f6368;
+  --bg:#f5f5f5;
+  --bg-panel:#ffffff;
+  --bg-card:#ffffff;
+  --line:#d8d8d8;
+  --line-dash:#a8a8a8;
+  --paper:#292929;
+  --accent:#8b1e2d;
+  --accent-dark:#671420;
+  --accent-soft:#f5e9eb;
+  --focus:#005ea8;
+  --success:#2f6f44;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'Lato', Arial, sans-serif;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit;}
+::selection{background:var(--accent);color:#ffffff;}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px;}
+
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px 80px;}
+
+/* ---------- Header / hub ---------- */
+header.hero{
+  position:relative;
+  padding:54px 24px 42px;
+  border-top:8px solid var(--accent);
+  border-bottom:1px solid var(--line);
+  background:var(--bg-panel);
+  overflow:hidden;
+}
+.hero-inner{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:1.1fr 0.9fr;gap:40px;align-items:center;}
+@media (max-width:860px){.hero-inner{grid-template-columns:1fr;}}
+.kicker{
+  font-family:'Lato', Arial, sans-serif;
+  font-size:13px;
+  color:var(--accent);
+  letter-spacing:0.06em;
+  text-transform:uppercase;
+  font-weight:700;
+  margin:0 0 14px;
+}
+h1{
+  font-family:'Lato', Arial, sans-serif;
+  font-weight:900;
+  font-size:clamp(28px,4vw,42px);
+  line-height:1.12;
+  margin:0 0 16px;
+}
+.hero p{
+  color:var(--ink-dim);
+  font-size:16px;
+  max-width:52ch;
+  margin:0 0 22px;
+}
+.hero-meta{display:flex;gap:22px;flex-wrap:wrap;font-size:13px;color:var(--ink-dim);font-family:'Lato',Arial,sans-serif;}
+.hero-meta b{color:var(--accent);font-weight:900;}
+
+/* hub svg */
+.hub-svg{width:100%;height:auto;display:block;}
+.hub-node{fill:var(--bg-card);stroke:var(--line-dash);stroke-width:1;}
+.hub-center{fill:var(--accent);}
+.hub-line{stroke:var(--line-dash);stroke-width:1;stroke-dasharray:3 4;fill:none;}
+.hub-label{font-family:'Lato',Arial,sans-serif;font-size:9px;fill:var(--ink-dim);}
+.hub-center-label{font-family:'Lato',Arial,sans-serif;font-size:9px;fill:#ffffff;font-weight:700;}
+
+/* ---------- Controls ---------- */
+.controls{
+  position:sticky; top:0; z-index:20;
+  background:rgba(255,255,255,0.97);
+  border-bottom:2px solid var(--accent);
+  padding:16px 24px;
+}
+.controls-inner{max-width:1180px;margin:0 auto;display:flex;gap:14px;align-items:center;flex-wrap:wrap;}
+.search-box{
+  flex:1 1 280px;
+  position:relative;
+}
+.search-box input{
+  width:100%;
+  background:var(--bg-panel);
+  border:1px solid var(--line);
+  border-radius:2px;
+  color:var(--ink);
+  font-family:'Lato',Arial,sans-serif;
+  font-size:15px;
+  padding:11px 14px 11px 38px;
+}
+.search-box input:focus{border-color:var(--focus);}
+.search-box svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--ink-dim);}
+.result-count{font-size:13px;color:var(--ink-dim);font-family:'Lato',Arial,sans-serif;white-space:nowrap;}
+.chip-row{display:flex;gap:8px;flex-wrap:wrap;}
+.chip{
+  border:1px solid var(--line);
+  background:transparent;
+  color:var(--ink-dim);
+  font-family:'Lato',Arial,sans-serif;
+  font-size:13px;
+  padding:7px 12px;
+  border-radius:2px;
+  cursor:pointer;
+}
+.chip:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);}
+.chip.active{border-color:var(--accent);color:#ffffff;background:var(--accent);}
+
+.view-switch{display:flex;border:1px solid var(--line);border-radius:3px;overflow:hidden;margin-left:auto;}
+.view-btn{border:0;border-right:1px solid var(--line);background:var(--bg-panel);color:var(--ink-dim);font:700 13px 'Lato',Arial,sans-serif;padding:8px 13px;cursor:pointer;}
+.view-btn:last-child{border-right:0;}
+.view-btn:hover{background:var(--accent-soft);color:var(--accent);}
+.view-btn.active{background:var(--accent);color:#fff;}
+
+/* ---------- Interactive map ---------- */
+.map-section{margin-top:28px;}
+.map-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:10px;}
+.map-hint{font-size:13px;color:var(--ink-dim);margin:0;}
+.map-back{display:none;border:1px solid var(--accent);background:var(--bg-panel);color:var(--accent);font:700 13px 'Lato',Arial,sans-serif;padding:7px 11px;border-radius:2px;cursor:pointer;}
+.map-back.show{display:inline-block;}
+.map-shell{display:grid;grid-template-columns:minmax(0,1fr) 280px;min-height:620px;background:var(--bg-panel);border:1px solid var(--line);border-left:3px solid var(--accent);}
+#systemMap{min-width:0;min-height:620px;background:radial-gradient(circle at center,#fff 0,#fff 34%,#f8f8f8 100%);}
+.map-detail{border-left:1px solid var(--line);padding:22px 20px;background:#fff;}
+.map-detail-kicker{margin:0 0 7px;color:var(--accent);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
+.map-detail h2{font-size:20px;line-height:1.25;margin:0 0 10px;}
+.map-detail p{font-size:13.5px;color:var(--ink-dim);margin:0 0 14px;}
+.map-detail-meta{display:grid;gap:8px;margin:16px 0;}
+.map-detail-meta span{font-size:12px;padding:7px 9px;background:var(--bg);border-left:2px solid var(--accent);}
+.map-detail a{display:inline-block;color:var(--accent);font-weight:700;text-decoration:none;border-bottom:1px solid currentColor;}
+.map-empty{height:100%;display:grid;place-items:center;text-align:center;padding:30px;color:var(--ink-dim);font-size:14px;}
+.list-section[hidden],.map-section[hidden]{display:none;}
+
+/* ---------- Legend ---------- */
+.legend{display:flex;gap:18px;flex-wrap:wrap;margin:22px 0 6px;font-size:13px;color:var(--ink-dim);}
+.legend span{display:inline-flex;align-items:center;gap:7px;}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.dot.pub{background:#6fbf7a;}
+.dot.int{background:transparent;border:1px solid var(--ink-dim);}
+
+/* ---------- Domain grid ---------- */
+.section-title{
+  font-family:'Lato',Arial,sans-serif;
+  font-size:22px;
+  font-weight:900;
+  margin:40px 0 4px;
+}
+.section-sub{color:var(--ink-dim);font-size:14px;margin:0 0 20px;}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(300px,1fr));
+  gap:16px;
+}
+.card{
+  background:var(--bg-card);
+  border:1px solid var(--line);
+  border-radius:3px;
+  overflow:hidden;
+  border-left:3px solid var(--card-color, var(--accent));
+}
+.card-head{
+  width:100%;
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  padding:18px 18px 16px;
+  background:none;
+  border:none;
+  cursor:pointer;
+  text-align:left;
+  color:inherit;
+  font:inherit;
+}
+.card-head:hover{background:#faf7f7;}
+.card-title-row{display:flex;align-items:center;gap:10px;}
+.card-swatch{width:10px;height:10px;border-radius:2px;background:var(--card-color);flex:none;}
+.card-name{font-family:'Lato',Arial,sans-serif;font-size:18px;font-weight:900;}
+.card-desc{color:var(--ink-dim);font-size:13.5px;margin-top:6px;max-width:46ch;}
+.card-count{
+  font-family:'Lato',Arial,sans-serif;
+  font-size:12px;
+  color:var(--card-color);
+  white-space:nowrap;
+  padding-top:3px;
+}
+.chevron{transition:transform .18s ease;flex:none;margin-top:4px;}
+.card[data-open="true"] .chevron{transform:rotate(180deg);}
+
+.card-body{
+  max-height:0;
+  overflow:hidden;
+  transition:max-height .25s ease;
+  border-top:1px solid var(--line);
+}
+.card[data-open="true"] .card-body{border-top:1px solid var(--line);}
+.card-body-inner{padding:6px 18px 14px;}
+.svc{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:10px;
+  padding:10px 0;
+  border-bottom:1px dashed var(--line);
+  font-size:14px;
+}
+.svc:last-child{border-bottom:none;}
+.svc-name{flex:1;}
+.svc-name a{text-decoration:none;border-bottom:1px solid var(--card-color);}
+.svc-name a:hover{color:var(--card-color);}
+.svc-audience{color:var(--ink-dim);font-size:12px;display:block;margin-top:2px;}
+.svc-tag{
+  flex:none;
+  font-family:'Lato',Arial,sans-serif;
+  font-size:11px;
+  padding:2px 7px;
+  border-radius:2px;
+  white-space:nowrap;
+}
+.svc-tag.pub{color:var(--success);border:1px solid #8fbea0;background:#edf6f0;}
+.svc-tag.int{color:var(--ink-dim);border:1px solid var(--line);}
+.svc-name.no-link{color:var(--ink-dim);}
+
+.highlights{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 14px;}
+.highlight-chip{
+  font-family:'Lato',Arial,sans-serif;
+  font-size:11px;
+  padding:3px 9px;
+  border-radius:2px;
+  border:1px solid var(--card-color);
+  color:var(--card-color);
+  background:color-mix(in srgb, var(--card-color) 10%, transparent);
+}
+.highlights-label{font-size:11px;color:var(--ink-dim);margin:0 0 8px;font-family:'Lato',Arial,sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.03em;}
+
+.empty-state{
+  text-align:center;
+  padding:60px 20px;
+  color:var(--ink-dim);
+  display:none;
+}
+.empty-state.show{display:block;}
+
+footer{
+  max-width:1180px;margin:60px auto 0;padding:24px;
+  border-top:1px solid var(--line);
+  color:var(--ink-dim);
+  font-size:12.5px;
+}
+footer p{margin:4px 0;}
+@media (max-width:640px){
+  header.hero{padding:36px 18px 30px;}
+  .wrap{padding-left:18px;padding-right:18px;}
+  .controls{padding-left:18px;padding-right:18px;}
+  .view-switch{order:-1;margin-left:0;width:100%;}
+  .view-btn{flex:1;}
+  .map-shell{grid-template-columns:1fr;min-height:720px;}
+  #systemMap{min-height:500px;}
+  .map-detail{border-left:0;border-top:1px solid var(--line);min-height:190px;}
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div>
+      <p class="kicker">Università degli Studi di Torino -Schema sintetico del sistema applicativo </p>
+      <h1>Il sistema informativo d'Ateneo</h1>
+      <p>La mappa offre una visione sintetica e navigabile dei principali ambiti, applicativi e servizi digitali dell’Università di Torino, consentendo di ricercare le singole voci e accedere alle relative risorse.</p>
+      <div class="hero-meta">
+        <span><b id="metaTotal">—</b> servizi mappati</span>
+        <span><b id="metaDomains">10</b> ambiti</span>
+      </div>
+    </div>
+    <svg class="hub-svg" viewBox="0 0 320 260" aria-hidden="true">
+      <g class="hub-line">
+        <path d="M50 130 C 110 40, 140 30, 200 24"/>
+        <path d="M50 130 C 110 60, 140 55, 200 55"/>
+        <path d="M50 130 C 110 85, 140 82, 200 86"/>
+        <path d="M50 130 C 110 108, 140 108, 200 117"/>
+        <path d="M50 130 C 100 128, 140 130, 200 130"/>
+        <path d="M50 130 C 110 152, 140 152, 200 143"/>
+        <path d="M50 130 C 110 175, 140 178, 200 174"/>
+        <path d="M50 130 C 110 198, 140 205, 200 205"/>
+        <path d="M50 130 C 110 220, 140 230, 200 236"/>
+      </g>
+      <circle class="hub-center" cx="50" cy="130" r="28"/>
+      <text class="hub-center-label" x="50" y="126" text-anchor="middle">SISTEMA</text>
+      <text class="hub-center-label" x="50" y="137" text-anchor="middle">UniTo</text>
+      <circle class="hub-node" cx="200" cy="24" r="9"/>
+      <circle class="hub-node" cx="200" cy="55" r="9"/>
+      <circle class="hub-node" cx="200" cy="86" r="9"/>
+      <circle class="hub-node" cx="200" cy="117" r="9"/>
+      <circle class="hub-node" cx="200" cy="130" r="9"/>
+      <circle class="hub-node" cx="200" cy="143" r="9"/>
+      <circle class="hub-node" cx="200" cy="174" r="9"/>
+      <circle class="hub-node" cx="200" cy="205" r="9"/>
+      <circle class="hub-node" cx="200" cy="236" r="9"/>
+      <text class="hub-label" x="215" y="27" text-anchor="start">Anagrafiche di base e identità digitali</text>
+      <text class="hub-label" x="215" y="58" text-anchor="start">Didattica</text>
+      <text class="hub-label" x="215" y="89" text-anchor="start">Ricerca e terza missione</text>
+      <text class="hub-label" x="215" y="120" text-anchor="start">Risorse umane</text>
+      <text class="hub-label" x="215" y="133" text-anchor="start">Contabilità &amp; finanza</text>
+      <text class="hub-label" x="215" y="146" text-anchor="start">Patrimonio immobiliare e logistica</text>
+      <text class="hub-label" x="215" y="177" text-anchor="start">Gestione documenti</text>
+      <text class="hub-label" x="215" y="208" text-anchor="start">Biblioteche</text>
+      <text class="hub-label" x="215" y="239" text-anchor="start">Sistemi decisionali · Portale</text>
+    </svg>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="controls-inner">
+    <div class="search-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="searchInput" type="text" placeholder="Cerca un servizio, es. «cedolino», «tesi», «wifi»…" autocomplete="off">
+    </div>
+    <div class="chip-row" id="chipRow">
+      <button class="chip active" data-filter="all">Tutti</button>
+      <button class="chip" data-filter="pub">Solo pubblici</button>
+      <button class="chip" data-filter="int">Solo interni</button>
+    </div>
+    <span class="result-count" id="resultCount"></span>
+    <div class="view-switch" role="group" aria-label="Modalità di visualizzazione">
+      <button class="view-btn active" id="mapViewBtn" type="button" aria-pressed="true">Mappa</button>
+      <button class="view-btn" id="listViewBtn" type="button" aria-pressed="false">Elenco</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="legend">
+    <span><span class="dot pub"></span> Servizio pubblico online (elenco servizi UniTo)</span>
+    <span><span class="dot int"></span> Applicazione interna / Intranet (accesso riservato)</span>
+  </div>
+
+  <section class="map-section" id="mapSection" aria-labelledby="mapTitle">
+    <p class="section-title" id="mapTitle">Mappa interattiva del sistema</p>
+    <div class="map-toolbar">
+      <p class="map-hint" id="mapHint">Seleziona un ambito per esplorarne servizi e applicativi.</p>
+      <button class="map-back" id="mapBack" type="button">← Tutti gli ambiti</button>
+    </div>
+    <div class="map-shell">
+      <div id="systemMap" role="application" aria-label="Mappa interattiva degli ambiti e dei servizi UniTo"></div>
+      <aside class="map-detail" id="mapDetail" aria-live="polite">
+        <p class="map-detail-kicker">Sistema informativo UniTo</p>
+        <h2>Esplora la mappa</h2>
+        <p>Seleziona uno dei dieci ambiti per visualizzare i servizi collegati. Puoi anche usare la ricerca e i filtri.</p>
+        <div class="map-detail-meta"><span>10 ambiti funzionali</span><span id="detailTotal">— servizi mappati</span></div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="list-section" id="listSection" aria-labelledby="listTitle" hidden>
+    <p class="section-title" id="listTitle">Ambiti del sistema applicativo</p>
+    <p class="section-sub">Gli applicativi e i servizi digitali sono organizzati per ambito funzionale. Seleziona un riquadro per consultarne le principali componenti e accedere alle risorse disponibili.</p>
+    <div class="grid" id="grid"></div>
+    <div class="empty-state" id="emptyState">Nessun servizio trovato. Prova un altro termine di ricerca.</div>
+  </section>
+</div>
+
+<footer>
+  <p>La mappa è uno strumento di consultazione in corso di aggiornamento.</p>
+<strong>Ultimo aggiornamento:</strong> Settembre 2026.</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/cytoscape@3.30.4/dist/cytoscape.min.js"></script>
+<script>
+const DOMAINS = [
+{
+  id:"anagrafiche", name:"Anagrafiche di base e identità digitali", color:"#6b5b95",
+  desc:"Dati di persone, luoghi e strutture, più le credenziali che aprono tutti gli altri ambiti.",
+  highlights:["Personale","Luoghi","Strutture Organizzative","Gestione Credenziali"],
+  services:[
+    {name:"Rubrica di Ateneo: cerca nomi e indirizzi", url:"http://www.unito.it/rubrica", aud:"Tutti", tag:"pub"},
+    {name:"Rubrica di Ateneo: modifica i dati", url:"https://www.unito.it/rubrica", aud:"Dottorandi, Docenti, PTA", tag:"pub"},
+    {name:"Mappa strutture e sedi dell'Ateneo", url:"https://web.unito.it/maps/", aud:"Tutti", tag:"pub"},
+    {name:"Organizzazione, strutture e sedi", url:"https://www.unito.it/ateneo/organizzazione-strutture-e-sedi", aud:"Tutti", tag:"pub"},
+    {name:"Gestione delle Credenziali di Autenticazione", url:"https://intranet.unito.it/display/SER/Account+e+credenziali+SCU", aud:"Tutti", tag:"int"},
+    {name:"Gestione password di accesso alle Applicazioni Online", url:"https://servizipersonale.unito.it/areaRiservataPersonale/menu.php", aud:"Tutti", tag:"pub"},
+    {name:"Servizi Federazione IDEM", url:"https://www.unito.it/servizi/servizi-online/unito-idem", aud:"Tutti", tag:"pub"},
+    {name:"UniTo - eduGAIN", url:"https://www.unito.it/servizi/servizi-online/unito-edugain", aud:"Tutti", tag:"pub"},
+    {name:"WiFi in UniTo", url:"https://www.unito.it/servizi/servizi-online/il-wifi-delluniversita", aud:"Tutti", tag:"pub"},
+    {name:"Licenze software Campus di Ateneo", url:"https://www.unito.it/servizi/servizi-online/licenze-software-campus-di-ateneo", aud:"Studenti, Dottorandi, Docenti, PTA", tag:"pub"},
+    {name:"Help desk", url:"https://intranet.unito.it/display/SER/Help+desk", aud:"Tutti", tag:"int"},
+    {name:"SPOC - Servizio di primo livello", url:"https://intranet.unito.it/pages/viewpage.action?pageId=12061190", aud:"Utenti abilitati", tag:"int"},
+    {name:"Jira Service Desk", url:"https://intranet.unito.it/display/SER/Jira+Service+Desk", aud:"Utenti abilitati", tag:"int"},
+    {name:"Attivazione di un Service Desk", url:"https://intranet.unito.it/display/SER/Attivazione+di+un+Service+Desk", aud:"Strutture", tag:"int"},
+    {name:"Sondaggistica online (Uniquest)", url:"http://www.uniquest.unito.it/admin/admin.php", aud:"Dottorandi, Docenti, PTA", tag:"pub"},
+    {name:"Google Forms - Moduli Google", url:"https://intranet.unito.it/display/SER/Google+Forms+-+Moduli+Google", aud:"Tutti", tag:"int"}
+  ]
+},
+{
+  id:"didattica", name:"Didattica", color:"#b35a22",
+  desc:"Iscrizioni, piano carriera, esami, laurea, mobilità internazionale e placement.",
+  highlights:["Procedure Carriere Studenti","Mobilità Internazionale","Prenotazione Esami","E-learning Moodle","App MyUniTO+","Edumeter"],
+  services:[
+    {name:"Iscrizione online ai corsi di studio", url:"http://my.unito.it/", aud:"Future matricole, Studenti", tag:"pub"},
+    {name:"Ammissione al dottorato di ricerca", url:"https://www.unito.it/ricerca-e-innovazione/percorsi-e-carriere-nella-ricerca/dottorati-di-ricerca", aud:"Laureate e Laureati", tag:"pub"},
+    {name:"Compilazione piano carriera", url:"http://my.unito.it/", aud:"Studenti", tag:"pub"},
+    {name:"Libretto esami online", url:"http://my.unito.it/", aud:"Studenti", tag:"pub"},
+    {name:"Appelli d'esame", url:"https://www.unito.it/didattica/piano-carriera-lezioni-ed-esami/appelli-desame", aud:"Studenti, Docenti", tag:"pub"},
+    {name:"Registro delle lezioni", url:"https://esse3.unito.it/auth/docente/RegistroDocente/Home.do?EnableLayout=1", aud:"Personale docente", tag:"int"},
+    {name:"Registro per attività didattica", url:"https://webapps.unito.it/registro_docenti/index.php", aud:"Personale docente", tag:"int"},
+    {name:"GDA - Gestione didattica di Ateneo", url:"https://unito.gda.cineca.it/", aud:"Personale docente, PTA", tag:"int"},
+    {name:"Reportistica carriere studenti (ReCS)", url:"https://unito.bi.u-gov.it/pentaho/Home", aud:"Personale abilitato", tag:"int"},
+    {name:"Simulatore Tasse", url:"https://simulatore.tasse.unito.it/", aud:"Studenti", tag:"int"},
+    {name:"Consegna online della tesi di laurea", url:"https://my.unito.it/", aud:"Studenti", tag:"pub"},
+    {name:"Archivio delle tesi online", url:"https://www.unito.it/didattica/esame-di-laurea/consulta-larchivio-delle-tesi-di-laurea", aud:"Tutti", tag:"pub"},
+    {name:"Tesi on line - archivio relatori e autorizzati", url:"https://www.unito.it/servizi/la-laurea/tesi-line/archivio-tesi-line-relatori-e-autorizzati", aud:"Relatori, personale autorizzato", tag:"int"},
+    {name:"Sistema di verifica plagio nei documenti (Turnitin)", url:"https://www.unito.it/node/4686", aud:"Dottorandi, Docenti, PTA", tag:"int"},
+    {name:"Segreteria online", url:"https://www.unito.it/servizi/segreterie-studenti-e-uffici-aperti-al-pubblico/segreterie-studenti", aud:"Studenti", tag:"pub"},
+    {name:"Erasmus per studio", url:"https://my.unito.it/", aud:"Studenti, Laureate/i", tag:"pub"},
+    {name:"Simulatore Borse Erasmus", url:"https://intranet.unito.it/display/SER/Simulatore+borse+Erasmus", aud:"Personale abilitato", tag:"int"},
+    {name:"E-learning (Moodle e sistemi di registrazione lezioni)", url:"https://www.unito.it/didattica/e-learning/le-piattaforme-e-learning-ateneo", aud:"Studenti, Dottorandi, Docenti, PTA", tag:"pub"},
+    {name:"Web conference/Virtual room - Webex (personale)", url:"https://www.unito.it/didattica/e-learning/virtual-room-sistema-di-web-conference", aud:"Dottorandi, Docenti, PTA", tag:"pub"},
+    {name:"Web conference/Virtual room - Webex (studenti)", url:"https://www.unito.it/didattica/e-learning/virtual-room-sistema-di-web-conference", aud:"Studenti", tag:"pub"},
+    {name:"App MyUniTO+", url:"https://www.unito.it/servizi/servizi-online/app-myunito", aud:"Tutti", tag:"pub"},
+    {name:"MyUniTo (area riservata)", url:"http://my.unito.it/", aud:"Tutti", tag:"pub"},
+    {name:"Valutazione qualità della didattica (Edumeter)", url:"http://www.edumeter.unito.it/", aud:"Studenti", tag:"pub"},
+    {name:"Candidatura online agli annunci di lavoro e tirocinio", url:"https://www.unito.it/servizi/verso-il-mondo-del-lavoro/job-placement/offerte-di-lavoro-e-tirocinio", aud:"Studenti, Laureate/i", tag:"pub"},
+    {name:"Compila e aggiorna il curriculum vitae", url:"https://unijob.unito.it/unijob_studenti/login/login.asp", aud:"Studenti, Laureate/i", tag:"pub"},
+    {name:"Consultazione curriculum vitae", url:"https://unijob.unito.it/pubb_cv/index.php", aud:"Enti e Imprese", tag:"pub"},
+    {name:"Pubblicazione annunci di lavoro e tirocinio extracurriculare", url:"https://unijob.unito.it/unijob_imprese/index.php", aud:"Enti e Imprese", tag:"pub"},
+    {name:"Sistema informatico per il placement (UniJob)", url:"https://unijob.unito.it/unijob/jp/loginjp.asp", aud:"Personale abilitato", tag:"int"},
+    {name:"Valutazione del tirocinio", url:"https://www.unito.it/servizi/verso-il-mondo-del-lavoro/job-placement/tirocini-curriculari-ed-extracurriculari", aud:"Studenti, Enti e Imprese", tag:"pub"},
+    {name:"Service desk studenti", url:"https://hdstudenti.unito.it/", aud:"Studenti", tag:"pub"}
+  ]
+},
+{
+  id:"ricerca", name:"Ricerca e terza missione", color:"#4f7b3a",
+  desc:"Archivi dei prodotti della ricerca, gestione progetti e public engagement.",
+  highlights:["UNI-FIND","Sistema SMART","Public Engagement","Timesheet U-WEB","Borse Erasmus"],
+  services:[
+    {name:"UNI-FIND - Spazio UniTo per la Ricerca e Terza Missione", url:"https://unifind.unito.it/", aud:"Personale docente e ricercatore", tag:"int"},
+    {name:"IRIS AperTo - Catalogo prodotti e archivio open access", url:"http://iris.unito.it/", aud:"Tutti", tag:"pub"},
+    {name:"Progetto SMART - Management della Ricerca e Terza Missione", url:"https://intranet.unito.it/display/SER/SMART+-+Management+della+Ricerca+e+Terza+Missione", aud:"Personale abilitato", tag:"int"},
+    {name:"Registro delle iniziative di Public Engagement", url:"https://intranet.unito.it/display/RI/Registro+delle+iniziative+di+Public+Engagement", aud:"Personale abilitato", tag:"int"},
+    {name:"Timesheet U-WEB (Piattaforma InTime)", url:"https://unito.u-web.cineca.it/appts/timesheet", aud:"Personale su progetti", tag:"int"},
+    {name:"Simulatore Borse Erasmus", url:"https://intranet.unito.it/display/SER/Simulatore+borse+Erasmus", aud:"Personale abilitato", tag:"int"}
+  ]
+},
+{
+  id:"ru", name:"Risorse umane", color:"#8b1e2d",
+  desc:"Presenze, stipendi, concorsi, formazione, sicurezza e valutazione del personale.",
+  highlights:["Cartellino Web","Cedolino Stipendi Online","Concorsi PICA","Formazione Sicurezza","Buoni Pasto"],
+  services:[
+    {name:"Cartellino Web", url:"https://cartellinoweb.unito.it/StartWeb/default.aspx", aud:"Personale tecnico amministrativo", tag:"pub"},
+    {name:"Cedolino stipendi/CU online", url:"https://unito.u-web.cineca.it/appced/#!/listaCedolini", aud:"Dottorandi, Docenti, PTA", tag:"pub"},
+    {name:"PICA - Piattaforma integrata Concorsi di Ateneo", url:"https://intranet.unito.it/display/SER/Piattaforma+integrata+Concorsi+di+Ateneo+PICA", aud:"Personale abilitato", tag:"int"},
+    {name:"BackOffice bandi di concorso a tempo determinato", url:"https://sia.unito.it/concorsiweb/", aud:"Personale abilitato", tag:"int"},
+    {name:"Formazione Sicurezza", url:"http://zucchetti-fe.ateneo.unito.it/HRPortal/jsp/login.jsp", aud:"Personale abilitato", tag:"int"},
+    {name:"Schede SERI (sicurezza sul lavoro)", url:"https://unitossl.unito.it/index.php", aud:"Operatori abilitati", tag:"int"},
+    {name:"UniGnam - Consultazione buoni pasto", url:"https://intranet.unito.it/display/RU/Buoni+pasto", aud:"Personale tecnico amministrativo", tag:"pub"},
+    {name:"Missioni", url:"https://intranet.unito.it/display/RU/Missioni", aud:"Personale abilitato", tag:"int"},
+    {name:"Formazione - Richiesta e approvazione corsi", url:"https://intranet.unito.it/display/RU/Richiesta+e+approvazione+corsi", aud:"Personale abilitato", tag:"int"},
+    {name:"Sprint - Performance management", url:"https://intranet.unito.it/display/RU/Sprint+-+Performance+management", aud:"Personale abilitato", tag:"int"},
+    {name:"U-Web - Valutazione Prestazioni", url:"https://intranet.unito.it/display/RU/U-Web+-+Valutazione+Prestazioni", aud:"Personale abilitato", tag:"int"},
+    {name:"Invio SMS", url:"https://servizipersonale.unito.it/areaRiservataPersonale/menu.php", aud:"Docenti, PTA", tag:"pub"},
+    {name:"Applicazioni per il personale", url:"https://intranet.unito.it/display/SER/Applicazioni+e+service+desk", aud:"Docenti, PTA", tag:"pub"}
+  ]
+},
+{
+  id:"contabilita", name:"Contabilità & finanza", color:"#8a6b12",
+  desc:"Acquisti, rimborsi, pagamenti, flussi di tesoreria e bandi di gara.",
+  highlights:["Richiesta di Acquisto (RDA)","Flussi Poste e Tesorerie","U-Web Reporting","Incarichi e Pagamenti"],
+  services:[
+    {name:"RDA - Richiesta di Acquisto", url:"https://intranet.unito.it/display/SER/RDA+-+Richiesta+d%27acquisto", aud:"Personale abilitato", tag:"int"},
+    {name:"Flussi Poste e Tesorerie", url:"", aud:"Personale contabilità", tag:"int"},
+    {name:"Rimborsi Cassa Economale", url:"https://intranet.unito.it/display/SER/Rimborsi+Cassa+Economale", aud:"Personale abilitato", tag:"int"},
+    {name:"Applicativo Incarichi e Pagamenti", url:"https://archivioincarichi.unito.it/", aud:"Personale abilitato", tag:"int"},
+    {name:"U-Web Reporting", url:"https://intranet.unito.it/display/SER/UWEB+Reporting", aud:"Personale abilitato", tag:"int"},
+    {name:"Elenco bandi di gara - UBUY", url:"https://unito.ubuy.cineca.it/PortaleAppalti/it/homepage.wp", aud:"Enti e Imprese, Tutti", tag:"pub"}
+  ]
+},
+{
+  id:"patrimonio", name:"Patrimonio e logistica", color:"#3f756d",
+  desc:"Immobili, aule, magazzino, eventi e tessere di accesso.",
+  highlights:["OpenSipi (Patrimonio Immobiliare)","University Planner (UP)","SNELLO (Magazzino)","Bandi UBUY","Help Desk Edilizia"],
+  services:[
+    {name:"OpenSipi - Anagrafica patrimonio immobiliare", url:"https://intranet.unito.it/display/SER/OpenSipi+-+Sistema+Informativo+Patrimonio+Immobiliare", aud:"Personale abilitato", tag:"pub"},
+    {name:"Cerca aule - Elenco aule - Scheda aule", url:"https://aule.unito.it/cerca/", aud:"Tutti", tag:"pub"},
+    {name:"Programmazione didattica delle aule (University Planner)", url:"https://unito.prod.up.cineca.it/", aud:"Docenti, PTA", tag:"pub"},
+    {name:"SNELLO - Gestione magazzino", url:"https://intranet.unito.it/display/SER/SNELLO+-+Gestione+magazzino", aud:"Personale abilitato", tag:"int"},
+    {name:"Applicativo Gestionale Eventi", url:"https://intranet.unito.it/display/SER/Organizzazione+di+eventi+di+Ateneo", aud:"Personale abilitato", tag:"int"},
+    {name:"Statistiche Eventi", url:"https://statistiche.unito.it/eventi", aud:"Personale abilitato", tag:"int"},
+    {name:"Elenco bandi di gara - UBUY", url:"https://unito.ubuy.cineca.it/PortaleAppalti/it/homepage.wp", aud:"Enti e Imprese, Tutti", tag:"pub"},
+    {name:"Help Desk - Direzione Edilizia, Logistica e Sostenibilità", url:"https://hdedilog.unito.it/", aud:"Personale abilitato", tag:"int"},
+    {name:"Prenotazione e supporto Smart card/Badge", url:"https://www.unito.it/servizi/servizi-online/tessera-elettronica-smart-card", aud:"Studenti, PTA", tag:"pub"}
+  ]
+},
+{
+  id:"documenti", name:"Gestione documenti", color:"#93463f",
+  desc:"Protocollo, albo ufficiale, piattaforme documentali e comunicazione interna.",
+  highlights:["Titulus (Protocollo)","Albo Ufficiale di Ateneo","Alfresco (Piattaforma Documentale)","Bacheca"],
+  services:[
+    {name:"Titulus - il protocollo informatico", url:"https://intranet.unito.it/display/SER/Protocollo+informatico+-+Titulus", aud:"Personale abilitato", tag:"int"},
+    {name:"Albo di Ateneo online - Pubblicità legale", url:"https://webapps.unito.it/albo_ateneo/", aud:"Tutti", tag:"pub"},
+    {name:"Piattaforma documentale Alfresco (personale Ateneo)", url:"http://www.unito.it/share", aud:"Dottorandi, Docenti, PTA", tag:"pub"},
+    {name:"Piattaforma documentale Alfresco (utenti esterni autorizzati)", url:"http://www.unito.it/extrashare", aud:"Docenti, PTA", tag:"pub"},
+    {name:"Bacheca", url:"", aud:"Comunità UniTo", tag:"int"},
+    {name:"Regolamenti di Ateneo e Statuto", url:"https://statutoregolamenti.unito.it/", aud:"Tutti", tag:"pub"},
+    {name:"Votazioni elettroniche degli organi - Eligo", url:"https://intranet.unito.it/display/AT/Votazioni+elettroniche+degli+organi+-+Eligo", aud:"Membri organi", tag:"int"},
+    {name:"Strumenti per riunioni telematiche degli organi di Ateneo", url:"https://intranet.unito.it/display/AT/Strumenti+per+riunioni+telematiche+degli+organi+di+Ateneo", aud:"Membri organi", tag:"int"},
+    {name:"Unito Postale", url:"https://intranet.unito.it/display/SER/Unito+Postale", aud:"Utenti autorizzati", tag:"int"},
+    {name:"Reclami e segnalazioni (Imbuca l'idea)", url:"https://imbucaidea.unito.it/", aud:"Tutti", tag:"pub"},
+    {name:"Rassegna stampa", url:"https://intranet.unito.it/display/AT/Rassegna+stampa", aud:"Dottorandi, Docenti, PTA", tag:"pub"}
+  ]
+},
+{
+  id:"biblioteche", name:"Biblioteche", color:"#336b8e",
+  desc:"Cataloghi, risorse bibliografiche e servizi per l'accessibilità dei testi.",
+  highlights:["Polo Bibliografico della Ricerca","Eureka (Risorse Bibliografiche)","SensusLibrary"],
+  services:[
+    {name:"Catalogo del Polo bibliografico della ricerca", url:"https://www.sba.unito.it/it/sistema-bibliotecario/polo-bibliografico-della-ricerca", aud:"Tutti", tag:"pub"},
+    {name:"Eureka - Risorse bibliografiche", url:"https://unito.on.worldcat.org/discovery", aud:"Tutti", tag:"pub"},
+    {name:"SensusLibrary - Richiesta testi in formato accessibile", url:"https://www.sba.unito.it/it/biblioteca/studenti-e-studentesse-con-disabilita-e-dsa", aud:"Studenti con disabilità/DSA", tag:"pub"},
+    {name:"EndNote - gestione bibliografie", url:"https://intranet.unito.it/display/SER/End+Note", aud:"Personale abilitato", tag:"int"}
+  ]
+},
+{
+  id:"cruscotti", name:"Sistemi decisionali", color:"#606a73",
+  desc:"Datawarehouse, cruscotti ufficiali e reportistica a supporto del controllo di gestione.",
+  highlights:["Datawarehouse","Cruscotti Ufficiali","Controllo di Gestione","Analisi Dati Strategica"],
+  services:[
+    {name:"Sistemi informativi di supporto alle decisioni (Datawarehouse)", url:"https://intranet.unito.it/display/SER/Sistemi+informativi+di+supporto+alle+decisioni", aud:"Utenti abilitati", tag:"int"},
+    {name:"Sistemi informativi di supporto alle decisioni e cruscotti", url:"https://intranet.unito.it/display/SER/Sistemi+informativi+di+supporto+alle+decisioni+e+cruscotti", aud:"Utenti abilitati", tag:"int"},
+    {name:"Strumenti operativi per il controllo di gestione", url:"https://intranet.unito.it/display/AT/Strumenti+operativi+per+il+controllo+di+gestione", aud:"Utenti abilitati", tag:"int"},
+    {name:"Sistemi di reportistica specifici dei servizi", url:"https://intranet.unito.it/display/SER/Sistemi+di+reportistica+specifici+dei+servizi", aud:"Utenti abilitati", tag:"int"},
+    {name:"OPENDATA di Ateneo", url:"https://www.unito.it/ateneo/gli-speciali/open-data", aud:"Tutti", tag:"pub"},
+    {name:"Statistiche Applicazioni ICT / Firme APP IO", url:"https://intranet.unito.it/display/SER/Statistiche+Applicazioni+ICT", aud:"Utenti abilitati", tag:"int"}
+  ]
+},
+{
+  id:"portale", name:"Portale, web e social", color:"#76538d",
+  desc:"Sito d'Ateneo, intranet, social media, posta e strumenti di collaborazione.",
+  highlights:["Portale Unito.it","Intranet di Ateneo","Social Media & Network","Google Apps","Webex Web Conference"],
+  services:[
+    {name:"Motore di ricerca del portale", url:"http://www.unito.it/", aud:"Tutti", tag:"pub"},
+    {name:"Intranet di Ateneo", url:"http://www.unito.it/intranet", aud:"Dottorandi, Docenti, PTA", tag:"pub"},
+    {name:"UniTo sui social media", url:"https://www.unito.it/ateneo/chi-siamo/unito-comunica/social-media", aud:"Tutti", tag:"pub"},
+    {name:"Unito Media", url:"https://media.unito.it/", aud:"Tutti", tag:"pub"},
+    {name:"Botta e Risposta", url:"https://webapps.unito.it/bottaerisposta/", aud:"Tutti", tag:"pub"},
+    {name:"Google Apps (Gmail, Calendar, Drive, Chat, Keep, Tasks)", url:"https://www.unito.it/servizi/servizi-online/webmail", aud:"Studenti, Dottorandi, Docenti, PTA", tag:"pub"},
+    {name:"Web conference/Virtual room - Webex (personale)", url:"https://www.unito.it/didattica/e-learning/virtual-room-sistema-di-web-conference", aud:"Dottorandi, Docenti, PTA", tag:"pub"},
+    {name:"Web conference/Virtual room - Webex (studenti)", url:"https://www.unito.it/didattica/e-learning/virtual-room-sistema-di-web-conference", aud:"Studenti", tag:"pub"},
+    {name:"Siti web a supporto della didattica", url:"https://www.unito.it/ateneo/organizzazione-strutture-e-sedi/strutture/dipartimenti", aud:"Tutti", tag:"pub"},
+    {name:"Vocalizzazione online", url:"https://www.unito.it/servizi/servizi-online/il-portale-di-ateneo/accessibilita/servizio-di-vocalizzazione-online", aud:"Tutti", tag:"pub"},
+    {name:"Webmail degli studenti", url:"https://www.unito.it/servizi/servizi-online/webmail/webmail-degli-studenti", aud:"Studenti, Laureate/i", tag:"pub"},
+    {name:"Webmail del personale", url:"https://www.unito.it/servizi/servizi-online/webmail/webmail-del-personale", aud:"Dottorandi, Docenti, PTA", tag:"pub"}
+  ]
+}
+];
+
+const grid = document.getElementById('grid');
+const emptyState = document.getElementById('emptyState');
+const resultCount = document.getElementById('resultCount');
+const searchInput = document.getElementById('searchInput');
+const chipRow = document.getElementById('chipRow');
+const mapSection = document.getElementById('mapSection');
+const listSection = document.getElementById('listSection');
+const mapViewBtn = document.getElementById('mapViewBtn');
+const listViewBtn = document.getElementById('listViewBtn');
+const mapBack = document.getElementById('mapBack');
+const mapHint = document.getElementById('mapHint');
+const mapDetail = document.getElementById('mapDetail');
+let activeFilter = 'all';
+let activeView = 'map';
+let selectedDomain = null;
+let cy = null;
+
+const totalServices = DOMAINS.reduce((n,d)=>n+d.services.length,0);
+document.getElementById('metaTotal').textContent = totalServices;
+document.getElementById('metaDomains').textContent = DOMAINS.length;
+document.getElementById('detailTotal').textContent = `${totalServices} servizi mappati`;
+
+function safeText(value){
+  return String(value).replace(/[&<>'"]/g, c=>({
+    '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'
+  })[c]);
+}
+
+function setMapDetail(item, domain){
+  if(!item){
+    mapDetail.innerHTML = `<p class="map-detail-kicker">Sistema informativo UniTo</p>
+      <h2>Esplora la mappa</h2>
+      <p>Seleziona uno dei dieci ambiti per visualizzare i servizi collegati. Puoi anche usare la ricerca e i filtri.</p>
+      <div class="map-detail-meta"><span>${DOMAINS.length} ambiti funzionali</span><span>${totalServices} servizi mappati</span></div>`;
+    return;
+  }
+  if(item.kind==='domain'){
+    const count = item.services.filter(s=>svcMatches(s,searchInput.value.trim().toLowerCase(),activeFilter)).length;
+    mapDetail.innerHTML = `<p class="map-detail-kicker">Ambito funzionale</p>
+      <h2>${safeText(item.name)}</h2><p>${safeText(item.desc)}</p>
+      <div class="map-detail-meta"><span>${count} servizi visualizzati</span><span>${item.services.length} servizi complessivi</span></div>
+      <p>Seleziona un nodo collegato per consultarne destinatari e collegamento.</p>`;
+    return;
+  }
+  const link = item.url ? `<a href="${safeText(item.url)}" target="_blank" rel="noopener">Apri il servizio ↗</a>` : '<p>Collegamento non disponibile.</p>';
+  mapDetail.innerHTML = `<p class="map-detail-kicker">${item.tag==='pub'?'Servizio pubblico':'Applicazione interna'}</p>
+    <h2>${safeText(item.name)}</h2><p>Ambito: ${safeText(domain.name)}</p>
+    <div class="map-detail-meta"><span>Destinatari: ${safeText(item.aud)}</span><span>Accesso: ${item.tag==='pub'?'pubblico online':'riservato / intranet'}</span></div>${link}`;
+}
+
+function mapElements(){
+  const q = searchInput.value.trim().toLowerCase();
+  const elements = [];
+  const positions = {};
+  const filteredDomains = DOMAINS.map(d=>({domain:d,matches:d.services.filter(s=>svcMatches(s,q,activeFilter))})).filter(x=>x.matches.length);
+
+  if(selectedDomain){
+    const entry = filteredDomains.find(x=>x.domain.id===selectedDomain);
+    if(!entry) return {elements,positions,mode:'empty'};
+    elements.push({data:{id:'domain-'+entry.domain.id,label:entry.domain.name,kind:'domain',color:entry.domain.color}});
+    positions['domain-'+entry.domain.id] = {x:0,y:0};
+    entry.matches.forEach((svc,i)=>{
+      const id=`svc-${entry.domain.id}-${entry.domain.services.indexOf(svc)}`;
+      const ring=Math.floor(i/14); const inRing=i%14; const ringCount=Math.min(14,entry.matches.length-ring*14);
+      const angle=(Math.PI*2*inRing/ringCount)-Math.PI/2; const radius=190+(ring*120);
+      elements.push({data:{id,label:svc.name,kind:'service',domainId:entry.domain.id,serviceIndex:entry.domain.services.indexOf(svc),tag:svc.tag,color:entry.domain.color}});
+      elements.push({data:{id:`edge-${id}`,source:'domain-'+entry.domain.id,target:id}});
+      positions[id]={x:Math.cos(angle)*radius,y:Math.sin(angle)*radius};
+    });
+    return {elements,positions,mode:'focus'};
+  }
+
+  elements.push({data:{id:'core',label:'Sistema\nUniTo',kind:'core'}});
+  positions.core={x:0,y:0};
+  filteredDomains.forEach((entry,i)=>{
+    const id='domain-'+entry.domain.id; const angle=(Math.PI*2*i/filteredDomains.length)-Math.PI/2;
+    elements.push({data:{id,label:`${entry.domain.name}\n${entry.matches.length}`,kind:'domain',color:entry.domain.color}});
+    elements.push({data:{id:`edge-${id}`,source:'core',target:id}});
+    positions[id]={x:Math.cos(angle)*245,y:Math.sin(angle)*245};
+  });
+  return {elements,positions,mode:filteredDomains.length?'overview':'empty'};
+}
+
+function updateMap(){
+  if(activeView!=='map') return;
+  const state=mapElements();
+  mapBack.classList.toggle('show',Boolean(selectedDomain));
+  mapHint.textContent=selectedDomain ? 'Seleziona un servizio per consultarne i dettagli.' : 'Seleziona un ambito per esplorarne servizi e applicativi.';
+  if(typeof cytoscape==='undefined'){
+    document.getElementById('systemMap').innerHTML='<div class="map-empty">La libreria della mappa non è disponibile. Usa la vista Elenco.</div>';
+    return;
+  }
+  if(cy) cy.destroy();
+  cy=cytoscape({
+    container:document.getElementById('systemMap'), elements:state.elements,
+    style:[
+      {selector:'node',style:{'font-family':'Lato, Arial, sans-serif','font-size':11,'text-wrap':'wrap','text-max-width':115,'text-valign':'center','text-halign':'center','label':'data(label)','background-color':'#fff','border-width':2,'border-color':'data(color)','color':'#292929','width':54,'height':54,'overlay-opacity':0}},
+      {selector:'node[kind="core"]',style:{'width':92,'height':92,'background-color':'#8b1e2d','border-width':0,'color':'#fff','font-size':14,'font-weight':700}},
+      {selector:'node[kind="domain"]',style:{'width':96,'height':96,'background-color':'data(color)','background-opacity':.12,'font-size':12,'font-weight':700,'text-max-width':120}},
+      {selector:'node[kind="service"]',style:{'shape':'round-rectangle','width':118,'height':58,'background-color':'#fff','font-size':10,'text-max-width':105}},
+      {selector:'node[tag="int"]',style:{'border-style':'dashed'}},
+      {selector:'node:selected',style:{'border-width':4,'border-color':'#005ea8'}},
+      {selector:'edge',style:{'width':1,'line-color':'#b8b8b8','curve-style':'bezier','opacity':.8}}
+    ],
+    layout:state.mode==='empty'?{name:'preset'}:{name:'preset',positions:state.positions,fit:true,padding:70},
+    minZoom:.25,maxZoom:2.2,wheelSensitivity:.22
+  });
+  cy.on('tap','node',evt=>{
+    const data=evt.target.data();
+    if(data.kind==='domain'){
+      const domain=DOMAINS.find(d=>'domain-'+d.id===data.id);
+      if(selectedDomain===domain.id){ setMapDetail({kind:'domain',...domain}); return; }
+      selectedDomain=domain.id; setMapDetail({kind:'domain',...domain}); updateMap();
+    } else if(data.kind==='service'){
+      const domain=DOMAINS.find(d=>d.id===data.domainId);
+      setMapDetail(domain.services[data.serviceIndex],domain);
+    } else setMapDetail(null);
+  });
+  if(state.mode==='empty') setMapDetail(null);
+}
+
+function setView(view){
+  activeView=view;
+  const isMap=view==='map';
+  mapSection.hidden=!isMap; listSection.hidden=isMap;
+  mapViewBtn.classList.toggle('active',isMap); listViewBtn.classList.toggle('active',!isMap);
+  mapViewBtn.setAttribute('aria-pressed',isMap); listViewBtn.setAttribute('aria-pressed',!isMap);
+  if(isMap) requestAnimationFrame(updateMap); else render();
+}
+
+function svcMatches(svc, q, filter){
+  if(filter!=='all' && svc.tag!==filter) return false;
+  if(!q) return true;
+  const hay = (svc.name+' '+svc.aud).toLowerCase();
+  return hay.includes(q);
+}
+
+function render(){
+  const q = searchInput.value.trim().toLowerCase();
+  grid.innerHTML = '';
+  let shown = 0;
+  let visibleCount = 0;
+
+  DOMAINS.forEach(domain=>{
+    const matches = domain.services.filter(s=>svcMatches(s,q,activeFilter));
+    if(matches.length===0) return;
+    shown++;
+    visibleCount += matches.length;
+
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.style.setProperty('--card-color', domain.color);
+    const isOpen = q.length>0; // auto-expand while searching
+    card.dataset.open = isOpen ? 'true' : 'false';
+
+    const head = document.createElement('button');
+    head.className = 'card-head';
+    head.setAttribute('aria-expanded', isOpen);
+    head.innerHTML = `
+      <div>
+        <div class="card-title-row">
+          <span class="card-swatch"></span>
+          <span class="card-name">${domain.name}</span>
+        </div>
+        <div class="card-desc">${domain.desc}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="card-count">${matches.length}/${domain.services.length}</span>
+        <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>`;
+    head.addEventListener('click', ()=>{
+      const nowOpen = card.dataset.open !== 'true';
+      card.dataset.open = nowOpen ? 'true':'false';
+      head.setAttribute('aria-expanded', nowOpen);
+      syncHeight(card);
+    });
+
+    const body = document.createElement('div');
+    body.className = 'card-body';
+    const inner = document.createElement('div');
+    inner.className = 'card-body-inner';
+
+    if(domain.highlights && domain.highlights.length && !q){
+      const hWrap = document.createElement('div');
+      const label = document.createElement('p');
+      label.className = 'highlights-label';
+      label.textContent = 'Voci principali (dalla mappa concettuale)';
+      const chips = document.createElement('div');
+      chips.className = 'highlights';
+      domain.highlights.forEach(h=>{
+        const chip = document.createElement('span');
+        chip.className = 'highlight-chip';
+        chip.textContent = h;
+        chips.appendChild(chip);
+      });
+      hWrap.appendChild(label);
+      hWrap.appendChild(chips);
+      inner.appendChild(hWrap);
+    }
+
+    matches.forEach(svc=>{
+      const row = document.createElement('div');
+      row.className = 'svc';
+      const nameCell = svc.url
+        ? `<a href="${svc.url}" target="_blank" rel="noopener">${svc.name}</a>`
+        : `<span class="no-link">${svc.name}</span>`;
+      row.innerHTML = `
+        <span class="svc-name">${nameCell}<span class="svc-audience">${svc.aud}</span></span>
+        <span class="svc-tag ${svc.tag}">${svc.tag==='pub'?'pubblico':'interno'}</span>`;
+      inner.appendChild(row);
+    });
+    body.appendChild(inner);
+    card.appendChild(head);
+    card.appendChild(body);
+    grid.appendChild(card);
+    syncHeight(card);
+  });
+
+  emptyState.classList.toggle('show', shown===0);
+  resultCount.textContent = q || activeFilter!=='all'
+    ? `${visibleCount} risultat${visibleCount===1?'o':'i'} in ${shown} ambit${shown===1?'o':'i'}`
+    : `${totalServices} servizi in ${DOMAINS.length} ambiti`;
+  updateMap();
+}
+
+function syncHeight(card){
+  const body = card.querySelector('.card-body');
+  if(card.dataset.open === 'true'){
+    body.style.maxHeight = body.scrollHeight + 'px';
+  } else {
+    body.style.maxHeight = '0px';
+  }
+}
+
+searchInput.addEventListener('input', ()=>{
+  if(selectedDomain){
+    const domain=DOMAINS.find(d=>d.id===selectedDomain);
+    if(!domain.services.some(s=>svcMatches(s,searchInput.value.trim().toLowerCase(),activeFilter))) selectedDomain=null;
+  }
+  render();
+});
+chipRow.addEventListener('click', e=>{
+  const btn = e.target.closest('.chip');
+  if(!btn) return;
+  chipRow.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  activeFilter = btn.dataset.filter;
+  if(selectedDomain){
+    const domain=DOMAINS.find(d=>d.id===selectedDomain);
+    if(!domain.services.some(s=>svcMatches(s,searchInput.value.trim().toLowerCase(),activeFilter))) selectedDomain=null;
+  }
+  render();
+});
+
+mapViewBtn.addEventListener('click',()=>setView('map'));
+listViewBtn.addEventListener('click',()=>setView('list'));
+mapBack.addEventListener('click',()=>{selectedDomain=null;setMapDetail(null);updateMap();});
+window.addEventListener('resize',()=>{if(cy) cy.resize().fit(undefined,60);});
+
+render();
+</script>
+</body>
+</html>
